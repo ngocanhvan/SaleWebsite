@@ -295,7 +295,7 @@ const forgotPasswordToken = asyncHandler(async (req, res) => {
                             Hi, Please follow this link to reset your password. 
                             This link is valid till 10 minutes from now.
                             <a
-                                href='http://localhost:3000/reset-password/${token}'
+                                href='http://localhost:1234/reset-password/${token}'
                             >
                                 Click here
                             </a>
