@@ -56,7 +56,7 @@ const Header = () => {
           <div className="row align-items-center">
             <div className="col-2">
               <h2>
-                <Link className="text-white">Group 16</Link>
+                <Link className="text-white">Group 17</Link>
               </h2>
             </div>
             <div className="col-4">
