@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import axios from "axios";
-import { Modal } from "react-bootstrap";
-import { MdDeleteForever } from "react-icons/md";
-import { AiOutlineEdit } from "react-icons/ai";
+import {Modal} from "react-bootstrap";
+import {MdDeleteForever} from "react-icons/md";
+import {AiOutlineEdit} from "react-icons/ai";
 import jwt_decode from "jwt-decode";
 import Cookies from "js-cookie";
+import moment from "moment";
 
 const Categorylist = () => {
   const [data, setData] = useState([]);
@@ -32,14 +33,11 @@ const Categorylist = () => {
 
         localStorage.setItem("access_token", JSON.stringify(newToken));
         // Tiếp tục sử dụng token mới
-        const res = await axios.get(
-          "http://localhost:5000/api/prodcategory/",
-          {
-            headers: {
-              Authorization: `Bearer ${newToken}`,
-            },
-          }
-        );
+        const res = await axios.get("http://localhost:5000/api/prodcategory/", {
+          headers: {
+            Authorization: `Bearer ${newToken}`,
+          },
+        });
         setData(res.data);
       } else {
         // Token còn hiệu lực, tiếp tục sử dụng
@@ -108,7 +106,7 @@ const Categorylist = () => {
     setShowModal(true);
   };
   const handleUpdateProdCategory = async (e) => {
-    const { id, title } = updateData;
+    const {id, title} = updateData;
     try {
       const token = JSON.parse(localStorage.getItem("access_token"));
       const decodedToken = jwt_decode(token);
@@ -129,7 +127,7 @@ const Categorylist = () => {
         // Tiếp tục sử dụng token mới
         await axios.put(
           `http://localhost:5000/api/prodcategory/${id}`,
-          { title },
+          {title},
           {
             headers: {
               Authorization: `Bearer ${newToken}`,
@@ -142,7 +140,7 @@ const Categorylist = () => {
         // Token còn hiệu lực, tiếp tục sử dụng
         await axios.put(
           `http://localhost:5000/api/prodcategory/${id}`,
-          { title },
+          {title},
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -157,9 +155,58 @@ const Categorylist = () => {
     }
   };
   const handleCloseModal = () => setShowModal(false);
+
+  const [showModalAddCategory, setShowModalAddCategory] = useState(false);
+  const [dataCategory, setDataCategory] = useState({
+    title: "",
+  });
+  const handleShowModalAddCategory = () => {
+    setShowModalAddCategory(true);
+  };
+  const handleCloseModalAddCategory = () => {
+    setShowModalAddCategory(false);
+    setDataCategory({});
+  };
+  const token = JSON.parse(localStorage.getItem("access_token"));
+  const handleAddCategory = async () => {
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const formData = {
+        title: dataCategory.title,
+      };
+      await axios.post(
+        "http://localhost:5000/api/prodcategory/",
+        formData,
+        config
+      );
+      setShowModalAddCategory(false);
+      setDataCategory({});
+      fetchData();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const formatDateTime = (time) => {
+    const dateTimeString = time.toString();
+    const dateTime = moment(dateTimeString);
+
+    const formattedDate = dateTime.format("DD/MM/YYYY");
+    const formattedTime = dateTime.format("HH:mm:ss");
+    return `${formattedTime} ${formattedDate}`;
+  };
   return (
     <div>
-      <h3 className="mb-4 title">Product Categories</h3>
+      <div className="title_head">
+        <div className="title_text">Product Categories</div>
+        <button className="button" onClick={() => handleShowModalAddCategory()}>
+          Add Category
+        </button>
+      </div>
       <div className="container table-responsive">
         <table className="table table-bordered table-hover">
           <thead className="table-dark">
@@ -172,30 +219,32 @@ const Categorylist = () => {
             </tr>
           </thead>
           <tbody>
-            {data.map((value, index) => (
-              <tr key={value._id}>
-                <td>{index + 1}</td>
-                <td>{value.title}</td>
-                <td>{value.createdAt}</td>
-                <td>{value.updatedAt}</td>
-                <td>
-                  <button
-                    className="btn btn-success mx-2"
-                    onClick={() => handleShowModal(value._id, value.title)}
-                  >
-                    <AiOutlineEdit className="mb-1 mr-2 fs-5" />
-                    Update
-                  </button>
-                  <button
-                    className="btn btn-success mx-2"
-                    onClick={(e) => onDeleteProdCategory(value._id, e)}
-                  >
-                    <MdDeleteForever className="mb-1 mr-2 fs-5" />
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {data.map((value, index) => {
+              return (
+                <tr key={value._id}>
+                  <td>{index + 1}</td>
+                  <td>{value.title}</td>
+                  <td>{formatDateTime(value.createdAt)}</td>
+                  <td>{formatDateTime(value.updatedAt)}</td>
+                  <td>
+                    <button
+                      className="btn btn-success mx-2"
+                      onClick={() => handleShowModal(value._id, value.title)}
+                    >
+                      <AiOutlineEdit className="mb-1 mr-2 fs-5" />
+                      Update
+                    </button>
+                    <button
+                      className="btn btn-success mx-2"
+                      onClick={(e) => onDeleteProdCategory(value._id, e)}
+                    >
+                      <MdDeleteForever className="mb-1 mr-2 fs-5" />
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -215,7 +264,7 @@ const Categorylist = () => {
                 id="title"
                 value={updateData.title}
                 onChange={(e) =>
-                  setUpdateData({ ...updateData, title: e.target.value })
+                  setUpdateData({...updateData, title: e.target.value})
                 }
               />
             </div>
@@ -232,6 +281,44 @@ const Categorylist = () => {
             }
           >
             Save Changes
+          </button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={showModalAddCategory} onHide={handleCloseModalAddCategory}>
+        <Modal.Header closeButton>
+          <Modal.Title>Add category</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form>
+            <div className="mb-3">
+              <label htmlFor="title" className="form-label">
+                Title
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="title"
+                value={dataCategory.title}
+                onChange={(e) =>
+                  setDataCategory((prev) => ({...prev, title: e.target.value}))
+                }
+              />
+            </div>
+          </form>
+        </Modal.Body>
+        <Modal.Footer>
+          <button
+            className="btn btn-secondary"
+            onClick={handleCloseModalAddCategory}
+          >
+            Cancel
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={() => handleAddCategory()}
+          >
+            Add
           </button>
         </Modal.Footer>
       </Modal>

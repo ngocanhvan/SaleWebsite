@@ -1,0 +1,27 @@
+.container {
+    width: 100%;
+    height: auto;
+  }
+  .title_head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .title_text {
+    font-size: 20px;
+    font-weight: 500;
+    margin-left: 15px;
+  }
+  .button {
+    height: 100%;
+    border: none;
+    border-radius: 5px;
+    background-color: orange;
+    padding: 5px 10px;
+    color: white;
+  }
+  .button:hover {
+    background-color: rgb(232, 151, 0);
+  }
+  

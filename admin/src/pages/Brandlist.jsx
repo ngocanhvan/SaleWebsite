@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import axios from "axios";
-import { Modal } from "react-bootstrap";
-import { MdDeleteForever } from "react-icons/md";
-import { AiOutlineEdit } from "react-icons/ai";
+import {Modal} from "react-bootstrap";
+import {MdDeleteForever} from "react-icons/md";
+import {AiOutlineEdit} from "react-icons/ai";
 import jwt_decode from "jwt-decode";
 import Cookies from "js-cookie";
+import moment from "moment";
 
 const Brandlist = () => {
   const [data, setData] = useState([]);
@@ -102,7 +103,7 @@ const Brandlist = () => {
     setShowModal(true);
   };
   const handleUpdateBrand = async (e) => {
-    const { id, title } = updateData;
+    const {id, title} = updateData;
     try {
       const token = JSON.parse(localStorage.getItem("access_token"));
       const decodedToken = jwt_decode(token);
@@ -123,7 +124,7 @@ const Brandlist = () => {
         // Tiếp tục sử dụng token mới
         await axios.put(
           `http://localhost:5000/api/brand/${id}`,
-          { title },
+          {title},
           {
             headers: {
               Authorization: `Bearer ${newToken}`,
@@ -136,7 +137,7 @@ const Brandlist = () => {
         // Token còn hiệu lực, tiếp tục sử dụng
         await axios.put(
           `http://localhost:5000/api/brand/${id}`,
-          { title },
+          {title},
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -151,9 +152,54 @@ const Brandlist = () => {
     }
   };
   const handleCloseModal = () => setShowModal(false);
+
+  const [showModalAddBrand, setShowModalAddBrand] = useState(false);
+  const [dataBrand, setDataBrand] = useState({
+    title: "",
+  });
+  const handleShowModalAddBrand = () => {
+    setShowModalAddBrand(true);
+  };
+  const handleCloseModalAddBrand = () => {
+    setShowModalAddBrand(false);
+    setDataBrand({});
+  };
+  const token = JSON.parse(localStorage.getItem("access_token"));
+  const handleAddBrand = async () => {
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const formData = {
+        title: dataBrand.title,
+      };
+      await axios.post("http://localhost:5000/api/brand/", formData, config);
+      setShowModalAddBrand(false);
+      setDataBrand({});
+      fetchData();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const formatDateTime = (time) => {
+    const dateTimeString = time.toString();
+    const dateTime = moment(dateTimeString);
+
+    const formattedDate = dateTime.format("DD/MM/YYYY");
+    const formattedTime = dateTime.format("HH:mm:ss");
+    return `${formattedTime} ${formattedDate}`;
+  };
   return (
     <div>
-      <h3 className="mb-4 title">Brands</h3>
+      <div className="title_head">
+        <div className="title_text">Brands</div>
+        <button className="button" onClick={() => handleShowModalAddBrand()}>
+          Add Brand
+        </button>
+      </div>
       <div className="container table-responsive">
         <table className="table table-bordered table-hover">
           <thead className="table-dark">
@@ -170,8 +216,8 @@ const Brandlist = () => {
               <tr key={value._id}>
                 <td>{index + 1}</td>
                 <td>{value.title}</td>
-                <td>{value.createdAt}</td>
-                <td>{value.updatedAt}</td>
+                <td>{formatDateTime(value.createdAt)}</td>
+                <td>{formatDateTime(value.updatedAt)}</td>
                 <td>
                   <button
                     className="btn btn-success mx-2"
@@ -209,7 +255,7 @@ const Brandlist = () => {
                 id="title"
                 value={updateData.title}
                 onChange={(e) =>
-                  setUpdateData({ ...updateData, title: e.target.value })
+                  setUpdateData({...updateData, title: e.target.value})
                 }
               />
             </div>
@@ -226,6 +272,37 @@ const Brandlist = () => {
             }
           >
             Save Changes
+          </button>
+        </Modal.Footer>
+      </Modal>
+      <Modal show={showModalAddBrand} onHide={handleCloseModalAddBrand}>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Brand</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form>
+            <div className="mb-3">
+              <label htmlFor="title" className="form-label">
+                Title
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="title"
+                value={dataBrand.title}
+                onChange={(e) =>
+                  setDataBrand((prev) => ({...prev, title: e.target.value}))
+                }
+              />
+            </div>
+          </form>
+        </Modal.Body>
+        <Modal.Footer>
+          <button className="btn btn-secondary" onClick={handleCloseModalAddBrand}>
+            Cancel
+          </button>
+          <button className="btn btn-primary" onClick={() => handleAddBrand()}>
+            Add
           </button>
         </Modal.Footer>
       </Modal>

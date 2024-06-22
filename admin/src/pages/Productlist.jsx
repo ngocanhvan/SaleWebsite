@@ -1,14 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import axios from "axios";
-import { Modal } from "react-bootstrap";
-import { MdDeleteForever } from "react-icons/md";
-import { AiOutlineEdit, AiOutlineCloudUpload } from "react-icons/ai";
+import {Modal} from "react-bootstrap";
+import {MdDeleteForever} from "react-icons/md";
+import {AiOutlineEdit, AiOutlineCloudUpload} from "react-icons/ai";
 import jwt_decode from "jwt-decode";
 import Cookies from "js-cookie";
+import "../styles/productList.css";
+import moment from "moment";
 
 const Productlist = () => {
   const [data, setData] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showModalAddProduct, setShowModalAddProduct] = useState(false);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   useEffect(() => {
@@ -105,8 +108,6 @@ const Productlist = () => {
     category: "",
     brand: "",
     quantity: "",
-    color: "",
-    tags: "",
   });
   const fetchData = async () => {
     try {
@@ -196,9 +197,7 @@ const Productlist = () => {
     price,
     category,
     brand,
-    quantity,
-    color,
-    tags
+    quantity
   ) => {
     setUpdateData({
       id,
@@ -208,23 +207,52 @@ const Productlist = () => {
       category,
       brand,
       quantity,
-      color,
-      tags,
     });
     setShowModal(true);
   };
+  const handleShowModalAddProduct = () => {
+    setShowModalAddProduct(true);
+  };
+  const token = JSON.parse(localStorage.getItem("access_token"));
+  const [dataProduct, setDataProduct] = useState({
+    title: "",
+    description: "",
+    price: "",
+    category: "",
+    brand: "",
+    quantity: "",
+  });
+  const handleAddProduct = async () => {
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const formData = {
+        title: dataProduct.title,
+        description: dataProduct.description,
+        price: dataProduct.price,
+        category: dataProduct.category,
+        brand: dataProduct.brand,
+        quantity: dataProduct.quantity,
+      };
+      const response = await axios.post(
+        "http://localhost:5000/api/product/",
+        formData,
+        config
+      );
+      if (response?.data) {
+        setShowModalAddProduct(false);
+        fetchData();
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const handleUpdateProduct = async (e) => {
-    const {
-      id,
-      title,
-      description,
-      price,
-      category,
-      brand,
-      quantity,
-      color,
-      tags,
-    } = updateData;
+    const {id, title, description, price, category, brand, quantity} =
+      updateData;
     try {
       const token = JSON.parse(localStorage.getItem("access_token"));
       const decodedToken = jwt_decode(token);
@@ -252,8 +280,6 @@ const Productlist = () => {
             category,
             brand,
             quantity,
-            color,
-            tags,
           },
           {
             headers: {
@@ -274,8 +300,6 @@ const Productlist = () => {
             category,
             brand,
             quantity,
-            color,
-            tags,
           },
           {
             headers: {
@@ -291,6 +315,10 @@ const Productlist = () => {
     }
   };
   const handleCloseModal = () => setShowModal(false);
+  const handleCloseModalAddProduct = () => {
+    setShowModalAddProduct(false);
+    setDataProduct({});
+  };
 
   const handleUploadImage = async (id, files) => {
     try {
@@ -347,9 +375,23 @@ const Productlist = () => {
       throw new Error(error);
     }
   };
+
+  const formatDateTime = (time) => {
+    const dateTimeString = time.toString();
+    const dateTime = moment(dateTimeString);
+
+    const formattedDate = dateTime.format("DD/MM/YYYY");
+    const formattedTime = dateTime.format("HH:mm:ss");
+    return `${formattedTime} ${formattedDate}`;
+  };
   return (
-    <div>
-      <h3 className="mb-4 title">Products</h3>
+    <div className="container">
+      <div className="title_head">
+        <div className="title_text">Products</div>
+        <button className="button" onClick={() => handleShowModalAddProduct()}>
+          Add Product
+        </button>
+      </div>
       <div className="container table-responsive">
         <table className="table table-bordered table-hover">
           <thead className="table-dark">
@@ -357,16 +399,10 @@ const Productlist = () => {
               <th scope="col">No.</th>
               <th scope="col">Title</th>
               <th scope="col">Slug</th>
-              <th scope="col">Description</th>
               <th scope="col">Price</th>
               <th scope="col">Category</th>
               <th scope="col">Brand</th>
-              <th scope="col">Quantity</th>
-              <th scope="col">Sold</th>
               <th scope="col">Image</th>
-              <th scope="col">Color</th>
-              <th scope="col">Tags</th>
-              <th scope="col">Ratings</th>
               <th scope="col">Total Rating</th>
               <th scope="col">Created At</th>
               <th scope="col">Updated At</th>
@@ -379,12 +415,9 @@ const Productlist = () => {
                 <td>{index + 1}</td>
                 <td>{value.title}</td>
                 <td>{value.slug}</td>
-                <td>{value.description}</td>
                 <td>{value.price}</td>
                 <td>{value.category}</td>
                 <td>{value.brand}</td>
-                <td>{value.quantity}</td>
-                <td>{value.sold}</td>
                 <td>
                   {value.images.map((image, index) => (
                     <img
@@ -396,20 +429,9 @@ const Productlist = () => {
                     />
                   ))}
                 </td>
-                <td>{value.color}</td>
-                <td>{value.tags}</td>
-                <td>
-                  {value.ratings.map((rating, index) => (
-                    <div key={index}>
-                      <p>Star: {rating.star}</p>
-                      <p>Comment: {rating.comment}</p>
-                      <p>Posted by: {rating.postedby}</p>
-                    </div>
-                  ))}
-                </td>
                 <td>{value.totalrating}</td>
-                <td>{value.createdAt}</td>
-                <td>{value.updatedAt}</td>
+                <td>{formatDateTime(value.createdAt)}</td>
+                <td>{formatDateTime(value.updatedAt)}</td>
                 <td>
                   <button
                     className="btn btn-success my-2"
@@ -421,9 +443,7 @@ const Productlist = () => {
                         value.price,
                         value.category,
                         value.brand,
-                        value.quantity,
-                        value.color,
-                        value.tags
+                        value.quantity
                       )
                     }
                   >
@@ -442,7 +462,7 @@ const Productlist = () => {
                     Upload Image
                     <input
                       type="file"
-                      style={{ display: "none" }}
+                      style={{display: "none"}}
                       onChange={(e) =>
                         handleUploadImage(value._id, e.target.files)
                       }
@@ -471,7 +491,7 @@ const Productlist = () => {
                 id="title"
                 value={updateData.title}
                 onChange={(e) =>
-                  setUpdateData({ ...updateData, title: e.target.value })
+                  setUpdateData({...updateData, title: e.target.value})
                 }
               />
               <label htmlFor="description" className="form-label">
@@ -515,7 +535,7 @@ const Productlist = () => {
                 id="category"
                 value={updateData.category}
                 onChange={(e) =>
-                  setUpdateData({ ...updateData, category: e.target.value })
+                  setUpdateData({...updateData, category: e.target.value})
                 }
               >
                 <option value="">Select Blog Category</option>
@@ -533,7 +553,7 @@ const Productlist = () => {
                 id="brand"
                 value={updateData.brand}
                 onChange={(e) =>
-                  setUpdateData({ ...updateData, brand: e.target.value })
+                  setUpdateData({...updateData, brand: e.target.value})
                 }
               >
                 <option value="">Select Brand</option>
@@ -557,48 +577,6 @@ const Productlist = () => {
                   })
                 }
               />
-
-              <label htmlFor="color" className="form-label">
-                Color:
-              </label>
-              <select
-                name="color"
-                className="form-control py-3 mb-3"
-                id="color"
-                value={updateData.color}
-                onChange={(e) =>
-                  setUpdateData({ ...updateData, color: e.target.value })
-                }
-              >
-                <option value="">Select Color</option>
-                <option value="Xanh">Xanh</option>
-                <option value="Đỏ">Đỏ</option>
-                <option value="Tím">Tím</option>
-                <option value="Vàng">Vàng</option>
-                <option value="Lam">Lam</option>
-                <option value="Tràm">Tràm</option>
-                <option value="Lục">Lục</option>
-                <option value="Black">Black</option>
-                <option value="Nâu">Nâu</option>
-              </select>
-
-              <label htmlFor="tags" className="form-label">
-                Tags:
-              </label>
-              <select
-                name="tags"
-                className="form-control py-3 mb-3"
-                id="tags"
-                value={updateData.tags}
-                onChange={(e) =>
-                  setUpdateData({ ...updateData, tags: e.target.value })
-                }
-              >
-                <option value="">Select Tags</option>
-                <option value="featured">featured</option>
-                <option value="special">special</option>
-                <option value="popular">popular</option>
-              </select>
             </div>
           </form>
         </Modal.Body>
@@ -617,13 +595,131 @@ const Productlist = () => {
                 updateData.category,
                 updateData.brand,
                 updateData.quantity,
-                updateData.color,
-                updateData.tags,
                 e
               )
             }
           >
             Save Changes
+          </button>
+        </Modal.Footer>
+      </Modal>
+      <Modal show={showModalAddProduct} onHide={handleCloseModalAddProduct}>
+        <Modal.Header closeButton>
+          <Modal.Title>Add Product</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form>
+            <div className="mb-3">
+              <label htmlFor="title" className="form-label">
+                Title:
+              </label>
+              <input
+                type="text"
+                className="form-control mb-4"
+                id="title"
+                value={dataProduct.title}
+                onChange={(e) =>
+                  setDataProduct((prev) => ({...prev, title: e.target.value}))
+                }
+              />
+              <label htmlFor="description" className="form-label">
+                Description:
+              </label>
+              <input
+                type="text"
+                className="form-control mb-4"
+                id="description"
+                value={dataProduct.description}
+                onChange={(e) =>
+                  setDataProduct((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
+              />
+              <label htmlFor="price" className="form-label">
+                Price:
+              </label>
+              <input
+                type="number"
+                name="price"
+                className="form-control mb-4"
+                id="price"
+                value={dataProduct.price}
+                onChange={(e) =>
+                  setDataProduct((prev) => ({...prev, price: e.target.value}))
+                }
+              />
+
+              <label htmlFor="category" className="form-label">
+                Category:
+              </label>
+              <select
+                name="category"
+                className="form-control mb-4"
+                id="category"
+                value={dataProduct.category}
+                onChange={(e) =>
+                  setDataProduct((prev) => ({
+                    ...prev,
+                    category: e.target.value,
+                  }))
+                }
+              >
+                <option value="">Select Blog Category</option>
+                {categories.map((category) => (
+                  <option key={category._id}>{category.title}</option>
+                ))}
+              </select>
+
+              <label htmlFor="brand" className="form-label">
+                Select Brand:
+              </label>
+              <select
+                name="brand"
+                className="form-control mb-4"
+                id="brand"
+                value={dataProduct.brand}
+                onChange={(e) =>
+                  setDataProduct((prev) => ({...prev, brand: e.target.value}))
+                }
+              >
+                <option value="">Select Brand</option>
+                {brands.map((brand) => (
+                  <option key={brand._id}>{brand.title}</option>
+                ))}
+              </select>
+
+              <label htmlFor="quantity" className="form-label">
+                Quantity:
+              </label>
+              <input
+                type="number"
+                className="form-control mb-4"
+                id="quantity"
+                value={dataProduct.quantity}
+                onChange={(e) =>
+                  setDataProduct((prev) => ({
+                    ...prev,
+                    quantity: e.target.value,
+                  }))
+                }
+              />
+            </div>
+          </form>
+        </Modal.Body>
+        <Modal.Footer>
+          <button
+            className="btn btn-secondary"
+            onClick={handleCloseModalAddProduct}
+          >
+            Cancel
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={() => handleAddProduct()}
+          >
+            Add
           </button>
         </Modal.Footer>
       </Modal>

@@ -57,13 +57,6 @@ const getAllProduct = asyncHandler(async (req, res) => {
   try {
     //Filtering
     const queryObj = { ...req.query };
-    // const getallProducts = await Product.find(queryObj);
-    // const getallProducts = await Product.find({
-    //     brand: req.query.brand,
-    //     category: req.query.category,
-    // });
-    // const getallProducts = await Product.where("category").equals(req.query.category);
-    // res.json(getallProducts);
     const excludeFields = ["page", "sort", "limit", "fields"];
     excludeFields.forEach((el) => delete queryObj[el]);
     let queryStr = JSON.stringify(queryObj);
