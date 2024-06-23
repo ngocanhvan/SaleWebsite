@@ -210,6 +210,7 @@ const Productlist = () => {
     });
     setShowModal(true);
   };
+
   const handleShowModalAddProduct = () => {
     setShowModalAddProduct(true);
   };
@@ -403,6 +404,8 @@ const Productlist = () => {
               <th scope="col">Category</th>
               <th scope="col">Brand</th>
               <th scope="col">Image</th>
+              <th scope="col">Quantity</th>
+              <th scope="col">Sold</th>
               <th scope="col">Total Rating</th>
               <th scope="col">Created At</th>
               <th scope="col">Updated At</th>
@@ -415,7 +418,7 @@ const Productlist = () => {
                 <td>{index + 1}</td>
                 <td>{value.title}</td>
                 <td>{value.slug}</td>
-                <td>{value.price}</td>
+                <td>{value.price} vnd</td>
                 <td>{value.category}</td>
                 <td>{value.brand}</td>
                 <td>
@@ -429,6 +432,8 @@ const Productlist = () => {
                     />
                   ))}
                 </td>
+                <td>{value.quantity}</td>
+                <td>{value.sold}</td>
                 <td>{value.totalrating}</td>
                 <td>{formatDateTime(value.createdAt)}</td>
                 <td>{formatDateTime(value.updatedAt)}</td>
@@ -480,7 +485,7 @@ const Productlist = () => {
           <Modal.Title>Edit Product</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <form>
+          <div>
             <div className="mb-3">
               <label htmlFor="title" className="form-label">
                 Title:
@@ -578,7 +583,7 @@ const Productlist = () => {
                 }
               />
             </div>
-          </form>
+          </div>
         </Modal.Body>
         <Modal.Footer>
           <button className="btn btn-secondary" onClick={handleCloseModal}>
@@ -608,7 +613,7 @@ const Productlist = () => {
           <Modal.Title>Add Product</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <form>
+          <div>
             <div className="mb-3">
               <label htmlFor="title" className="form-label">
                 Title:
@@ -706,7 +711,7 @@ const Productlist = () => {
                 }
               />
             </div>
-          </form>
+          </div>
         </Modal.Body>
         <Modal.Footer>
           <button

@@ -154,7 +154,7 @@ const Dashboard = () => {
         localStorage.setItem("access_token", JSON.stringify(newToken));
         // Tiếp tục sử dụng token mới
         const res = await axios.get(
-          "http://localhost:5000/api/user/get-all-orders",
+          "http://localhost:5000/api/orderAdmin/get-all-orders",
           {
             headers: {
               Authorization: `Bearer ${newToken}`,
@@ -169,7 +169,7 @@ const Dashboard = () => {
       } else {
         // Token còn hiệu lực, tiếp tục sử dụng
         const response = await axios.get(
-          "http://localhost:5000/api/user/get-all-orders",
+          "http://localhost:5000/api/orderAdmin/get-all-orders",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -178,7 +178,6 @@ const Dashboard = () => {
         );
         const totalOrders = response.data.length;
         setCountOrder(totalOrders);
-        console.log(response.data);
         let sumPrice = 0;
         response.data.forEach((order) => {
           sumPrice += order.totalPrice;
@@ -251,7 +250,7 @@ const Dashboard = () => {
           </div>
           <div>
             <p className="desc">Total Sales</p>
-            <h4 className="mb-0 sub-title">{totalPrice} $</h4>
+            <h4 className="mb-0 sub-title">{totalPrice} VND</h4>
           </div>
         </div>
       </div>

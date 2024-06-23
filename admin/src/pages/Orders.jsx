@@ -8,6 +8,7 @@ import {AutoComplete, Divider, InputNumber} from "antd";
 import "../styles/orders.css";
 import {RiDeleteBin6Line} from "react-icons/ri";
 import {toast} from "react-toastify";
+import {MdDeleteForever} from "react-icons/md";
 
 const Orders = () => {
   const [data, setData] = useState([]);
@@ -195,17 +196,9 @@ const Orders = () => {
   };
   const token = JSON.parse(localStorage.getItem("access_token"));
   const [errorMsg, setErrorMsg] = useState({
-    customerName: "",
     orderItems: "",
   });
   const handleAddOrder = async () => {
-    if (dataOrder.customerName?.trim() === "" || !dataOrder.customerName) {
-      setErrorMsg((prev) => ({
-        ...prev,
-        customerName: "Please fill in customer name.",
-      }));
-      return;
-    }
     if (!productApply.length) {
       setErrorMsg((prev) => ({
         ...prev,
@@ -227,7 +220,7 @@ const Orders = () => {
           quantity: product.quantity,
         }));
         const formData = {
-          customerName: dataOrder.customerName,
+          customerName: dataOrder.customerName || "Khách lẻ",
           orderItems: orderItems,
           totalPrices: totalPrice,
         };
@@ -240,6 +233,8 @@ const Orders = () => {
           toast.success(data.msg);
           setShowModalAddOrder(false);
           setDataOrder({});
+          setProductApply([]);
+          setTotalPrice(0);
           fetchData();
         }
       } catch (error) {
@@ -279,7 +274,7 @@ const Orders = () => {
         id: data._id,
         title: data.title,
         price: data.price,
-        inventory_quantity: data.quantity - data.sold,
+        inventory_quantity: data.quantity,
         quantity: 1,
       };
       setProductApply((prev) => [...prev, profileProduct]);
@@ -329,6 +324,59 @@ const Orders = () => {
     setTotalPrice(total);
   };
 
+  const onDeleteOrder = async (id, e) => {
+    if (window.confirm("Bạn có chắc chắn muốn xóa dữ liệu này không?")) {
+      try {
+        const token = JSON.parse(localStorage.getItem("access_token"));
+        const decodedToken = jwt_decode(token);
+        const currentTime = Date.now() / 1000; // Chuyển đổi thời gian hiện tại sang đơn vị giây
+
+        if (decodedToken.exp < currentTime) {
+          // Token đã hết hạn, xử lý tương ứng (ví dụ: đăng nhập lại)
+          Cookies.get("refreshToken");
+          const response = await axios.get(
+            "http://localhost:5000/api/user/refresh",
+            {
+              withCredentials: true, // Gửi các cookie cùng với yêu cầu
+            }
+          );
+          const newToken = response.data.accessToken;
+
+          localStorage.setItem("access_token", JSON.stringify(newToken));
+          // Tiếp tục sử dụng token mới
+          const {data} = await axios.delete(
+            `http://localhost:5000/api/orderAdmin/${id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${newToken}`,
+              },
+            }
+          );
+          if (data.status === true) {
+            toast.success(data.msg);
+          }
+          fetchData();
+        } else {
+          // Token còn hiệu lực, tiếp tục sử dụng
+          const {data} = await axios.delete(
+            `http://localhost:5000/api/orderAdmin/${id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          if (data.status === true) {
+            toast.success(data.msg);
+          }
+          fetchData();
+        }
+      } catch (error) {
+        throw new Error(error);
+      }
+    }
+  };
+
   return (
     <div>
       <div className="title_head">
@@ -347,34 +395,46 @@ const Orders = () => {
               <th scope="col">TotalPrice</th>
               <th scope="col">Created At</th>
               <th scope="col">Updated At</th>
+              <th scope="col">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {data.map((value, index) => (
-              <tr key={value._id}>
-                <td>{index + 1}</td>
-                <td>{value.customerName}</td>
-                <td>
-                  {value.orderItems.map((item, index) => (
-                    <div key={index}>
-                      <p>
-                        Product:
-                        <button
-                          className="btn btn-link text-decoration-none"
-                          onClick={() => handleShowModalProduct(item.product)}
-                        >
-                          {dataOneProduct[item.product]}
-                        </button>
-                        {" "} ({item.quantity})
-                      </p>
-                    </div>
-                  ))}
-                </td>
-                <td>{value.totalPrice}</td>
-                <td>{formatDateTime(value.createdAt)}</td>
-                <td>{formatDateTime(value.updatedAt)}</td>
-              </tr>
-            ))}
+            {data.map((value, index) => {
+              return (
+                <tr key={value._id}>
+                  <td>{index + 1}</td>
+                  <td>{value.customerName}</td>
+                  <td>
+                    {value.orderItems.map((item, index) => (
+                      <div key={index}>
+                        <p>
+                          Product:
+                          <button
+                            className="btn btn-link text-decoration-none"
+                            onClick={() => handleShowModalProduct(item.product)}
+                          >
+                            {dataOneProduct[item.product]}
+                          </button>{" "}
+                          ({item.quantity})
+                        </p>
+                      </div>
+                    ))}
+                  </td>
+                  <td>{value.totalPrice} vnd</td>
+                  <td>{formatDateTime(value.createdAt)}</td>
+                  <td>{formatDateTime(value.updatedAt)}</td>
+                  <td>
+                    <button
+                      className="btn btn-success my-2"
+                      onClick={(e) => onDeleteOrder(value._id, e)}
+                    >
+                      <MdDeleteForever className="mb-1 mr-2 fs-5" />
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -388,7 +448,7 @@ const Orders = () => {
             <p>Title: {selectedProduct?.title}</p>
             <p>Slug: {selectedProduct?.slug}</p>
             <p>Description: {selectedProduct?.description}</p>
-            <p>Price: {selectedProduct?.price}</p>
+            <p>Price: {selectedProduct?.price} vnd</p>
             <p>Category: {selectedProduct?.category}</p>
             <p>Brand: {selectedProduct?.brand}</p>
           </div>
@@ -425,10 +485,8 @@ const Orders = () => {
                     ...prev,
                     customerName: e.target.value,
                   }));
-                  setErrorMsg((prev) => ({...prev, customerName: ""}));
                 }}
               />
-              {errorMsg.customerName && <div className="error_msg">{errorMsg.customerName}</div>}
             </div>
             <div className="mb-3">
               <label htmlFor="title" className="form-label">
@@ -452,12 +510,14 @@ const Orders = () => {
                 }
                 onSelect={handleSelectProduct}
               />
-              {errorMsg.orderItems && <div className="error_msg">{errorMsg.orderItems}</div>}
+              {errorMsg.orderItems && (
+                <div className="error_msg">{errorMsg.orderItems}</div>
+              )}
             </div>
             <div className="display_product">
-              {productApply.map((product) => {
+              {productApply.map((product, index) => {
                 return (
-                  <>
+                  <div key={index}>
                     <div className="product_container">
                       <div className="product_name">{product.title}</div>
                       <div className="product_qty">
@@ -480,7 +540,7 @@ const Orders = () => {
                       </div>
                     </div>
                     <Divider />
-                  </>
+                  </div>
                 );
               })}
             </div>

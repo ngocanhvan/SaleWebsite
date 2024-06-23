@@ -1,4 +1,5 @@
 const OrderAdmin = require("../models/OrderAdminModel");
+const Product = require("../models/productModel");
 const validateMongoDbId = require("../utils/validateMongoDbId");
 const asyncHandler = require("express-async-handler");
 
@@ -14,6 +15,18 @@ const createOrder = asyncHandler(async (req, res) => {
       orderItems,
       totalPrice,
     });
+    const promises = orderItems.map(async (item) => {
+      await Product.findByIdAndUpdate(
+        item.product,
+        {
+          $inc: {quantity: -item.quantity, sold: item.quantity},
+        },
+        {
+          new: true,
+        }
+      );
+    });
+    await Promise.all(promises);
     res.json({
       status: true,
       msg: "Create order successfully",
@@ -46,8 +59,24 @@ const updateOrder = asyncHandler(async (req, res) => {
   }
 });
 
+const deleteOrder = asyncHandler(async (req, res) => {
+  const {id} = req.params;
+  validateMongoDbId(id);
+  try {
+    const deleteOrder = await OrderAdmin.findByIdAndDelete(id);
+    res.json({
+      status: true,
+      msg: "Delete order successfully",
+      deleteOrder,
+    });
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+
 module.exports = {
   createOrder,
   getAllOrders,
   updateOrder,
+  deleteOrder,
 };

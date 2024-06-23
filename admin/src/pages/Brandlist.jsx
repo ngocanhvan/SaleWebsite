@@ -244,7 +244,6 @@ const Brandlist = () => {
           <Modal.Title>Edit Brand</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <form>
             <div className="mb-3">
               <label htmlFor="title" className="form-label">
                 Title
@@ -259,7 +258,6 @@ const Brandlist = () => {
                 }
               />
             </div>
-          </form>
         </Modal.Body>
         <Modal.Footer>
           <button className="btn btn-secondary" onClick={handleCloseModal}>
@@ -280,7 +278,6 @@ const Brandlist = () => {
           <Modal.Title>Edit Brand</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <form>
             <div className="mb-3">
               <label htmlFor="title" className="form-label">
                 Title
@@ -295,7 +292,6 @@ const Brandlist = () => {
                 }
               />
             </div>
-          </form>
         </Modal.Body>
         <Modal.Footer>
           <button className="btn btn-secondary" onClick={handleCloseModalAddBrand}>
