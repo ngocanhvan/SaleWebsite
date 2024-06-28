@@ -9,7 +9,7 @@ const {
 const router = express.Router();
 
 router.post("/create-order", authMiddleware, isAdmin, createOrder);
-router.get("/get-all-orders", authMiddleware, isAdmin, getAllOrders);
+router.post("/get-all-orders", authMiddleware, isAdmin, getAllOrders);
 router.put("/:id", authMiddleware, isAdmin, updateOrder);
 router.delete("/:id", authMiddleware, isAdmin, deleteOrder);
 

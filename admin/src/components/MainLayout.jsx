@@ -29,8 +29,8 @@ const MainLayout = () => {
       <Sider trigger={null} collapsible collapsed={collapsed}>
         <div className="logo">
           <h2 className="text-white fs-5 text-center py-3 mb-0">
-            <span className="sm-logo">DATN</span>
-            <span className="lg-logo">Đồ án tốt nghiệp</span>
+            <span className="sm-logo">S.M </span>
+            <span className="lg-logo">Sales Manager</span>
           </h2>
         </div>
         <Menu
@@ -183,7 +183,7 @@ const MainLayout = () => {
                   <img
                     width={36}
                     height={36}
-                    src="https://lh4.googleusercontent.com/-VRkt5Vq-Lzg/V4nLmzOVDgI/AAAAAAAAApE/ahuurvRj7Msu39bkGswiRpzNvBXm-1eSQCLcB/s640/anh-trai-dep-7.jpg"
+                    src="https://antimatter.vn/wp-content/uploads/2022/11/anh-avatar-trang-tron.jpg"
                     alt=""
                   />
                 </span>
@@ -192,7 +192,7 @@ const MainLayout = () => {
                     Hi, <span>Admin</span>
                   </h5>
                   <p className="mb-0">
-                    <span>admin@gmail.com</span>
+                    <span>van***02@gmail.com</span>
                   </p>
                 </div>
               </div>

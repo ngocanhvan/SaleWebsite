@@ -13,6 +13,7 @@ import {MdDeleteForever} from "react-icons/md";
 const Orders = () => {
   const [data, setData] = useState([]);
   const [allProduct, setAllProduct] = useState([]);
+  const [keySearch, setKeySearch] = useState("");
   const fetchData = async () => {
     try {
       const token = JSON.parse(localStorage.getItem("access_token"));
@@ -32,26 +33,32 @@ const Orders = () => {
 
         localStorage.setItem("access_token", JSON.stringify(newToken));
         // Tiếp tục sử dụng token mới
-        const res = await axios.get(
+        const res = await axios.post(
           "http://localhost:5000/api/orderAdmin/get-all-orders",
+          {
+            keySearch: keySearch,
+          },
           {
             headers: {
               Authorization: `Bearer ${newToken}`,
             },
           }
         );
-        setData(res.data);
+        setData(res.data.orders);
       } else {
         // Token còn hiệu lực, tiếp tục sử dụng
-        const response = await axios.get(
+        const response = await axios.post(
           "http://localhost:5000/api/orderAdmin/get-all-orders",
+          {
+            keySearch: keySearch,
+          },
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
         );
-        setData(response.data);
+        setData(response.data.orders);
       }
     } catch (error) {
       throw new Error(error);
@@ -59,12 +66,13 @@ const Orders = () => {
   };
   const fetchAllProduct = async () => {
     try {
-      const {data} = await axios.get("http://localhost:5000/api/product/", {
+      const {data} = await axios.post("http://localhost:5000/api/product/get-all-products", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      setAllProduct(data);
+      console.log(data, "11111111111111");
+      setAllProduct(data.products);
     } catch (error) {
       console.error(error);
     }
@@ -73,7 +81,7 @@ const Orders = () => {
     fetchData();
     fetchAllProduct();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [keySearch]);
 
   const [dataOneProduct, setDataOneProduct] = useState({});
   const [showModalProduct, setShowModalProduct] = useState(false);
@@ -381,6 +389,15 @@ const Orders = () => {
     <div>
       <div className="title_head">
         <div className="title_text">List Orders</div>
+        <div className="input_container">
+          <input
+            type="text"
+            className="input"
+            placeholder="Search here"
+            value={keySearch}
+            onChange={(e) => setKeySearch(e.target.value)}
+          />
+        </div>
         <button className="button" onClick={() => handleShowModalAddOrder()}>
           Add Order
         </button>
@@ -420,7 +437,7 @@ const Orders = () => {
                       </div>
                     ))}
                   </td>
-                  <td>{value.totalPrice} vnd</td>
+                  <td>{value.totalPrice} VND</td>
                   <td>{formatDateTime(value.createdAt)}</td>
                   <td>{formatDateTime(value.updatedAt)}</td>
                   <td>
@@ -448,7 +465,7 @@ const Orders = () => {
             <p>Title: {selectedProduct?.title}</p>
             <p>Slug: {selectedProduct?.slug}</p>
             <p>Description: {selectedProduct?.description}</p>
-            <p>Price: {selectedProduct?.price} vnd</p>
+            <p>Price: {selectedProduct?.price} VND</p>
             <p>Category: {selectedProduct?.category}</p>
             <p>Brand: {selectedProduct?.brand}</p>
           </div>
@@ -493,7 +510,7 @@ const Orders = () => {
                 TotalPrice:
               </label>
               <p style={{textAlign: "center", color: "red"}}>
-                {totalPrice} vnd
+                {totalPrice} VND
               </p>
             </div>
             <div className="mb-3 d-flex flex-column align-items-start">
@@ -531,7 +548,7 @@ const Orders = () => {
                           value={product?.quantity || 1}
                         />
                       </div>
-                      <div className="product_price">{product.price} vnd</div>
+                      <div className="product_price">{product.price} VND</div>
                       <div className="deleteBtn">
                         <RiDeleteBin6Line
                           onClick={() => handleDeleteProduct(product.id)}

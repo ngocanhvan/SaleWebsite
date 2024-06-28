@@ -173,7 +173,7 @@ const Couponlist = () => {
               <th scope="col">No.</th>
               <th scope="col">Name</th>
               <th scope="col">Expiry</th>
-              <th scope="col">Discount</th>
+              <th scope="col">Discount (%)</th>
               <th scope="col">Action</th>
             </tr>
           </thead>

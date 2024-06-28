@@ -106,7 +106,7 @@ const Addcoupon = () => {
             style={{ height: "60px", width: "100%" }}
           />
           <label htmlFor="discount" style={{ fontSize: "18px" }}>
-            Nhập discount của coupon:
+            Nhập discount của coupon (%):
           </label>
           <input
             type="number"

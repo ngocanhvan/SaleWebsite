@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { RiMoneyDollarCircleLine } from "react-icons/ri";
-import { HiShoppingBag } from "react-icons/hi";
-import { TiShoppingCart } from "react-icons/ti";
-import { FiUsers } from "react-icons/fi";
-import { Column } from "@ant-design/plots";
+import React, {useEffect, useState} from "react";
+import {RiMoneyDollarCircleLine} from "react-icons/ri";
+import {HiShoppingBag} from "react-icons/hi";
+import {TiShoppingCart} from "react-icons/ti";
+import {FiUsers} from "react-icons/fi";
+import {Column} from "@ant-design/plots";
 import axios from "axios";
 import jwt_decode from "jwt-decode";
 import Cookies from "js-cookie";
@@ -63,7 +63,7 @@ const Dashboard = () => {
     data,
     xField: "type",
     yField: "sales",
-    color: ({ type }) => {
+    color: ({type}) => {
       return "#ffd333";
     },
     label: {
@@ -108,21 +108,19 @@ const Dashboard = () => {
 
         localStorage.setItem("access_token", JSON.stringify(newToken));
         // Tiếp tục sử dụng token mới
-        const res = await axios.get("http://localhost:5000/api/product/", {
-          headers: {
-            Authorization: `Bearer ${newToken}`,
-          },
-        });
-        const totalProducts = res.data.length;
+        const res = await axios.post(
+          "http://localhost:5000/api/product/get-all-products",
+          {}
+        );
+        const totalProducts = res.data.totalProducts;
         setCountProduct(totalProducts);
       } else {
         // Token còn hiệu lực, tiếp tục sử dụng
-        const response = await axios.get("http://localhost:5000/api/product/", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const totalProducts = response.data.length;
+        const response = await axios.post(
+          "http://localhost:5000/api/product/get-all-products",
+          {}
+        );
+        const totalProducts = response.data.totalProducts;
         setCountProduct(totalProducts);
       }
     } catch (error) {
@@ -153,33 +151,35 @@ const Dashboard = () => {
         const newToken = response.data.accessToken;
         localStorage.setItem("access_token", JSON.stringify(newToken));
         // Tiếp tục sử dụng token mới
-        const res = await axios.get(
+        const res = await axios.post(
           "http://localhost:5000/api/orderAdmin/get-all-orders",
-          {
-            headers: {
-              Authorization: `Bearer ${newToken}`,
-            },
-          }
-        );
-        const totalOrders = res.data.length;
-        setCountOrder(totalOrders);
-        response.data.forEach((order) => {
-          setTotalPrice(order.totalPrice);
-        });
-      } else {
-        // Token còn hiệu lực, tiếp tục sử dụng
-        const response = await axios.get(
-          "http://localhost:5000/api/orderAdmin/get-all-orders",
+          {},
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
         );
-        const totalOrders = response.data.length;
+        const totalOrders = res.data.totalOrders;
+        setCountOrder(totalOrders);
+        response.data.forEach((order) => {
+          setTotalPrice(order.totalPrice);
+        });
+      } else {
+        // Token còn hiệu lực, tiếp tục sử dụng
+        const response = await axios.post(
+          "http://localhost:5000/api/orderAdmin/get-all-orders",
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const totalOrders = response.data.totalOrders;
         setCountOrder(totalOrders);
         let sumPrice = 0;
-        response.data.forEach((order) => {
+        response.data.orders.forEach((order) => {
           sumPrice += order.totalPrice;
         });
         setTotalPrice(sumPrice);

@@ -31,6 +31,6 @@ router.put('/rating', authMiddleware, rating);
 
 router.put('/:id', authMiddleware, isAdmin, updateProduct);
 router.delete('/:id', authMiddleware, isAdmin, deleteProduct);
-router.get('/', getAllProduct);
+router.post('/get-all-products', getAllProduct);
 
 module.exports = router;

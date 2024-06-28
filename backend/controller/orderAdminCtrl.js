@@ -38,9 +38,32 @@ const createOrder = asyncHandler(async (req, res) => {
 });
 
 const getAllOrders = asyncHandler(async (req, res) => {
+  const {currentPage, keySearch, itemsPerPage} = req.body;
   try {
-    const orders = await OrderAdmin.find();
-    res.json(orders);
+    let options = {};
+    if (keySearch) {
+      options = {
+        customerName: new RegExp(keySearch, "i"),
+      };
+    }
+    const orders = await OrderAdmin.find(options).sort({createdAt: -1});
+
+    const page = currentPage || 1;
+    const limit = itemsPerPage || 10;
+    const skip = (page - 1) * limit;
+
+    const totalOrders = await OrderAdmin.countDocuments(options);
+    const data = orders.slice(
+      skip,
+      parseInt(skip.toString()) + parseInt(limit.toString())
+    );
+    res.json({
+      status: true,
+      orders: data,
+      totalOrders,
+      page,
+      limit,
+    });
   } catch (error) {
     throw new Error(error);
   }
