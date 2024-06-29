@@ -1,7 +1,7 @@
 ### SaleWebsite
 ### Hướng dẫn chạy project
 
-# Bước 1: Cài môi trường nodeJS (link cài: đoạn m nhét link vào đây nhé)
+# Bước 1: Cài môi trường nodeJS (link cài: (https://nodejs.org/en/download/package-manager))
 # Bước 2: Giải nén file .rar sẽ ra 2 folder chính là admin và backend
 # - admin là folder chứa phần frontend của project
 # -backend là folder chứa phần xử lý logic nghiệp vụ của project
