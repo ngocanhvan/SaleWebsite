@@ -217,6 +217,14 @@ const Productlist = () => {
 
   const handleShowModalAddProduct = () => {
     setShowModalAddProduct(true);
+    setDataProduct({
+      title: "",
+      description: "",
+      price: "",
+      category: "",
+      brand: "",
+      quantity: "",
+    })
   };
   const token = JSON.parse(localStorage.getItem("access_token"));
   const [dataProduct, setDataProduct] = useState({
