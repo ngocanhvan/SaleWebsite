@@ -197,7 +197,7 @@ const Customers = () => {
   };
   return (
     <div>
-      <h3 className="mb-4 title">Customers</h3>
+      <h3 className="mb-4 title">Users</h3>
       <div className="container table-responsive">
         <table className="table table-bordered table-hover">
           <thead className="table-dark">
